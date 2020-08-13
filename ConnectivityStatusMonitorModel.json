@@ -1,0 +1,258 @@
+{
+    "detectorModelDefinition": {
+        "states": [
+            {
+                "stateName": "Notify",
+                "onInput": {
+                    "events": [
+                        {
+                            "eventName": "connectedEvent",
+                            "condition": "$input.lifecycle_event.eventType == \"connected\"",
+                            "actions": [
+                                {
+                                    "setVariable": {
+                                        "variableName": "deviceStatus",
+                                        "value": "\"connected\""
+                                    }
+                                },
+                                {
+                                    "setVariable": {
+                                        "variableName": "connectEvents",
+                                        "value": "$variable.connectEvents + 1"
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "eventName": "disconnectEvent",
+                            "condition": "$input.lifecycle_event.eventType == \"disconnected\"",
+                            "actions": [
+                                {
+                                    "setVariable": {
+                                        "variableName": "disconnectEvents",
+                                        "value": "$variable.disconnectEvents + 1"
+                                    }
+                                }
+                            ]
+                        }
+                    ],
+                    "transitionEvents": [
+                        {
+                            "eventName": "Go_Online",
+                            "condition": "$variable.deviceStatus == \"connected\"",
+                            "actions": [],
+                            "nextState": "Normal"
+                        }
+                    ]
+                },
+                "onEnter": {
+                    "events": [
+                        {
+                            "eventName": "snsNotification",
+                            "condition": "true",
+                            "actions": [
+                                {
+                                    "sns": {
+                                        "targetArn": "arn:aws:sns:us-east-1:000000000000:connectivity-status-notifications"
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "onExit": {
+                    "events": []
+                }
+            },
+            {
+                "stateName": "Offline",
+                "onInput": {
+                    "events": [
+                        {
+                            "eventName": "connectedEvent",
+                            "condition": "$input.lifecycle_event.eventType == \"connected\"",
+                            "actions": [
+                                {
+                                    "setVariable": {
+                                        "variableName": "deviceStatus",
+                                        "value": "\"connected\""
+                                    }
+                                },
+                                {
+                                    "setVariable": {
+                                        "variableName": "connectEvents",
+                                        "value": "$variable.connectEvents + 1"
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "eventName": "disconnectEvent",
+                            "condition": "$input.lifecycle_event.eventType == \"disconnected\"",
+                            "actions": [
+                                {
+                                    "setVariable": {
+                                        "variableName": "disconnectEvents",
+                                        "value": "$variable.disconnectEvents + 1"
+                                    }
+                                }
+                            ]
+                        }
+                    ],
+                    "transitionEvents": [
+                        {
+                            "eventName": "Go_Online",
+                            "condition": "$variable.deviceStatus == \"connected\"",
+                            "actions": [
+                                {
+                                    "clearTimer": {
+                                        "timerName": "disconnectAlertTimer"
+                                    }
+                                }
+                            ],
+                            "nextState": "Normal"
+                        },
+                        {
+                            "eventName": "Go_Notify",
+                            "condition": "timeout(\"disconnectAlertTimer\")",
+                            "actions": [
+                                {
+                                    "clearTimer": {
+                                        "timerName": "disconnectAlertTimer"
+                                    }
+                                }
+                            ],
+                            "nextState": "Notify"
+                        }
+                    ]
+                },
+                "onEnter": {
+                    "events": [
+                        {
+                            "eventName": "init",
+                            "condition": "true",
+                            "actions": [
+                                {
+                                    "setTimer": {
+                                        "timerName": "disconnectAlertTimer",
+                                        "seconds": 60,
+                                        "durationExpression": null
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "onExit": {
+                    "events": []
+                }
+            },
+            {
+                "stateName": "Normal",
+                "onInput": {
+                    "events": [
+                        {
+                            "eventName": "connectedEvent",
+                            "condition": "$input.lifecycle_event.eventType == \"connected\"",
+                            "actions": [
+                                {
+                                    "setVariable": {
+                                        "variableName": "deviceStatus",
+                                        "value": "\"connected\""
+                                    }
+                                },
+                                {
+                                    "clearTimer": {
+                                        "timerName": "disconnectTimer"
+                                    }
+                                },
+                                {
+                                    "setVariable": {
+                                        "variableName": "connectEvents",
+                                        "value": "$variable.connectEvents + 1"
+                                    }
+                                }
+                            ]
+                        },
+                        {
+                            "eventName": "disconnectedEvent",
+                            "condition": "$input.lifecycle_event.eventType == \"disconnected\"",
+                            "actions": [
+                                {
+                                    "setTimer": {
+                                        "timerName": "disconnectTimer",
+                                        "seconds": 60,
+                                        "durationExpression": null
+                                    }
+                                },
+                                {
+                                    "setVariable": {
+                                        "variableName": "disconnectEvents",
+                                        "value": "$variable.disconnectEvents + 1"
+                                    }
+                                }
+                            ]
+                        }
+                    ],
+                    "transitionEvents": [
+                        {
+                            "eventName": "Go_Offline",
+                            "condition": "timeout(\"disconnectTimer\")",
+                            "actions": [
+                                {
+                                    "setVariable": {
+                                        "variableName": "deviceStatus",
+                                        "value": "\"disconnected\""
+                                    }
+                                },
+                                {
+                                    "clearTimer": {
+                                        "timerName": "disconnectTimer"
+                                    }
+                                }
+                            ],
+                            "nextState": "Offline"
+                        }
+                    ]
+                },
+                "onEnter": {
+                    "events": [
+                        {
+                            "eventName": "init",
+                            "condition": "isUndefined($variable.deviceStatus)",
+                            "actions": [
+                                {
+                                    "setVariable": {
+                                        "variableName": "deviceStatus",
+                                        "value": "\"unknown\""
+                                    }
+                                },
+                                {
+                                    "setVariable": {
+                                        "variableName": "connectEvents",
+                                        "value": "0"
+                                    }
+                                },
+                                {
+                                    "setVariable": {
+                                        "variableName": "disconnectEvents",
+                                        "value": "0"
+                                    }
+                                }
+                            ]
+                        }
+                    ]
+                },
+                "onExit": {
+                    "events": []
+                }
+            }
+        ],
+        "initialStateName": "Normal"
+    },
+    "detectorModelDescription": null,
+    "detectorModelName": "ConnectivityStatusMonitorModel",
+    "evaluationMethod": "SERIAL",
+    "key": "clientId",
+    "roleArn": "arn:aws:iam::000000000000:role/service-role/ConnectivityStatusMonitorModelRole"
+}

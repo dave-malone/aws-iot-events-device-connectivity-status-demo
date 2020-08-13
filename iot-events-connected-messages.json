@@ -1,0 +1,9 @@
+{
+    "messages": [
+        {
+            "inputName": "lifecycle_event",
+            "messageId": "0000001",
+            "payload": "{\"clientId\":\"Demo_Thing\",\"eventType\":\"connected\"}"
+        }
+    ]
+}

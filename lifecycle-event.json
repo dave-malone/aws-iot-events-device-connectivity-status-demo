@@ -1,0 +1,11 @@
+{
+  "clientId": "Demo_Thing",
+  "timestamp": 1597244567732,
+  "eventType": "connected",
+  "sessionIdentifier": "session-id",
+  "principalIdentifier": "abcdefg",
+  "ipAddress": "12.21.456.654",
+  "clientInitiatedDisconnect": true,
+  "disconnectReason": "CLIENT_INITIATED_DISCONNECT",
+  "versionNumber": 0
+}
