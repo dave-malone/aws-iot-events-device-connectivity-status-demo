@@ -5,6 +5,10 @@ The following AWS IoT Events detector model uses Lifecycle events from AWS IoT C
 
 This model is intended to be used alongside AWS IoT Core, with a Rule configured to subscribing to `$aws/events/presence/#` and an Action configured to send these events to AWS IoT Events. However, that configuration is outside of the scope of this particular demo, since this demo can be run using the AWS CLI to emulate these events. This repo contains test payloads that model these events to help quickly iterate on the design and development of your IoT Events detector models.
 
+The following is a screenshot of what the provided `ConnectivityStatusMonitorModel.json` looks like when imported into your AWS IoT Events Console:
+
+![AWS IoT Events Detector Model](./detector-model-screenshot.png "AWS IoT Events Detector Model")
+
 # Pre-requisites
 
 * SNS topic configured and ARN replaced in `ConnectivityStatusMonitorModel.json` (line 56)
@@ -29,7 +33,7 @@ aws iotevents create-detector-model \
 
 # Testing
 
-The following CLI commands can be run in any order to help evaluate the state transitions, variables, and timers as they are configured in the detector model contained in this application. 
+The following CLI commands can be run in any order to help evaluate the state transitions, variables, and timers as they are configured in the detector model contained in this application.
 
 ```bash
 aws iotevents-data batch-put-message \
