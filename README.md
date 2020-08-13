@@ -9,7 +9,7 @@ The following is a screenshot of what the provided `ConnectivityStatusMonitorMod
 
 ![AWS IoT Events Detector Model](./detector-model-screenshot.png "AWS IoT Events Detector Model")
 
-# Pre-requisites
+# Prerequisites
 
 * SNS topic configured and ARN replaced in `ConnectivityStatusMonitorModel.json` (line 56)
 * IAM service role configured for IoT Events and ARN replaced in `ConnectivityStatusMonitorModel.json` (line 257)
